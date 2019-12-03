@@ -1,6 +1,4 @@
 import logging
-from time import sleep
-
 from gpiozero import DistanceSensor, Button
 from signal import pause
 
@@ -93,10 +91,9 @@ def switch_button_action(btn):
 Button.was_held = False
 
 if __name__ == '__main__':
-    # sensor = DistanceSensor(echo=23, trigger=24, max_distance=1, threshold_distance=0.5, partial=True)
-    # sensor.when_in_range = wakeup
-    # sensor.when_out_of_range = standby
-    stream_channel(toggle_channel.current_channel_id)  # TESTING
+    sensor = DistanceSensor(echo=23, trigger=24, max_distance=1, threshold_distance=0.5, partial=True)
+    sensor.when_in_range = wakeup
+    sensor.when_out_of_range = standby
     button = Button(4, hold_time=3)
     button.when_held = mark_held
     button.when_released = switch_button_action
