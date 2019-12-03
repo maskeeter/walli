@@ -1,0 +1,10 @@
+{
+  "youtube-dl": {
+    "format": "best[height>=360][height<=720][ext=mp4]",
+    "yesplaylist": true,
+    "ignoreerrors": true,
+    "playlistrandom": true,
+    "dump_single_json": true
+  },
+  "streamlink": {}
+}
