@@ -1,23 +1,22 @@
 import sys
 from multiprocessing import connection
-from tj_frame.utils import get_file_logger, run_in_separate_process
-from omxplayer.player import OMXPlayer
 from time import sleep
+
+from omxplayer.player import OMXPlayer
+
+from tj_frame.utils import get_file_logger, run_in_separate_process
 
 DEFAULT_CONFIG = []
 # this is a pointer to the module object instance itself.
 this = sys.modules[__name__]
 
 # we can explicitly make assignments on it
-this.players = {}
+this.active_players = {}
 
 
 def get_channel_player(channel: str):
-    print(channel)
-    print(this.players)
-    print(this.players.get(channel))
-    if channel in this.players.keys():
-        return this.players[channel]
+    if channel in this.active_players.keys():
+        return this.active_players[channel]
     return None
 
 
@@ -36,10 +35,10 @@ def run_omx_player_live(url: str, config: str):
     options = extract_options(config) if config else DEFAULT_CONFIG
     options.append('--live')
     player = OMXPlayer(url, args=options, dbus_name='org.mpris.MediaPlayer2.omxplayer.live')
-    add_player_log(player)
+    prepare_player(player)
     sleep(2.5)
     if player.is_playing():
-        this.players['live'] = player
+        this.active_players['live'] = player
         return player
     raise Exception('player not available')
 

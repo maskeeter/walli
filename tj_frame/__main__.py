@@ -1,6 +1,7 @@
 import logging
-from gpiozero import DistanceSensor, Button
 from signal import pause
+
+from gpiozero import DistanceSensor, Button
 
 from tj_frame import screen
 from tj_frame.player import get_channel_player
@@ -17,15 +18,11 @@ def toggle_channel():
         if toggle_channel.current_channel_id < len(CHANNELS) - 1 else 0
     if stream_channel.current_player:
         stream_channel.current_player.pause()
-        print('toggle: stopping {}'.format(stream_channel.current_player))
-        print('toggle: is playing {}'.format(stream_channel.current_player.is_playing()))
     player = get_channel_player(CHANNELS[toggle_channel.current_channel_id])
-    print('toggle: starting {}'.format(player))
     if player:
         player.play()
         stream_channel.current_player = player
     else:
-        print('new stream .......')
         stream_channel(toggle_channel.current_channel_id)
 
 
@@ -43,7 +40,6 @@ def stream_channel(channel_id: int):
                 stream_channel.current_player = stream(channel, ch_config)
         except Exception as e:
             if stream_channel.current_player and stream_channel.current_player.is_playing():
-                print(f'stopping player {stream_channel.current_player} to play outage ...')
                 stream_channel.current_player.pause()
             play_outage_channel(channel, 'streaming failed')
     else:
@@ -75,7 +71,7 @@ def standby():
 
 def mark_held(btn):
     btn.was_held = True
-    print('hold marked')
+    logging.info('hold marked')
 
 
 def switch_button_action(btn):

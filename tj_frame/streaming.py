@@ -2,9 +2,9 @@ import json
 import logging
 
 from tj_frame import screen
-from tj_frame.player import run_omx_player_file_loop, run_omx_player_live, run_gif_tv, run_omx_player_playlist
-from tj_frame.utils import read_config, list_updated, validate_url, kill_app
 from tj_frame.extractors import run_streamlink, run_youtube_dl
+from tj_frame.player import run_omx_player_file_loop, run_omx_player_live, run_gif_tv, run_omx_player_playlist
+from tj_frame.utils import read_config, list_updated, validate_url
 
 
 def extract_playlist(list_id: str, config_path: str):
@@ -69,8 +69,6 @@ def play_gif_tv(url: str, hashtags: list = None):
 
 
 def validate_channel_config(config: dict, channel: str):
-    print(config)
-    print(channel)
     if channel == 'pl' and (
             "list_id" and "extractor_config" and "config_file" and "playlist_path" and "playlist_target" in config) or channel == 'gif' and (
             "url" and "hashtags" in config) or channel == 'live' and ("url" and "player_config" in config):
