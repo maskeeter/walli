@@ -14,14 +14,14 @@ GLOBAL_CONFIG = read_config("config/global_config.json")
 
 
 def toggle_channel():
+    current_player = get_channel_player(CHANNELS[toggle_channel.current_channel_id])
+    if current_player and current_player.is_playing():
+        current_player.pause()
     toggle_channel.current_channel_id = toggle_channel.current_channel_id + 1 \
         if toggle_channel.current_channel_id < len(CHANNELS) - 1 else 0
-    if stream_channel.current_player:
-        stream_channel.current_player.pause()
     player = get_channel_player(CHANNELS[toggle_channel.current_channel_id])
     if player:
         player.play()
-        stream_channel.current_player = player
     else:
         stream_channel(toggle_channel.current_channel_id)
 
@@ -35,22 +35,23 @@ def stream_channel(channel_id: int):
     if GLOBAL_CONFIG:
         try:
             if not validate_channel_config(ch_config, channel):
-                stream_channel.current_player = play_outage_channel(channel, "invalid config")
+                play_outage_channel(channel, "invalid config")
             else:
-                stream_channel.current_player = stream(channel, ch_config)
+                outage = get_channel_player('outage')
+                if outage and outage.is_playing():
+                    outage.pause()
+                stream(channel, ch_config)
         except Exception as e:
-            if stream_channel.current_player and stream_channel.current_player.is_playing():
-                stream_channel.current_player.pause()
+            main_channel = get_channel_player(channel)
+            if main_channel and main_channel.is_playing():
+                main_channel.pause()
             play_outage_channel(channel, 'streaming failed')
     else:
         kill_app("No configuration exists!")
 
 
-stream_channel.current_player = None
-
-
 def wakeup():
-    player = stream_channel.current_player
+    player = get_channel_player(CHANNELS[toggle_channel.current_channel_id])
     if player:
         screen.turn_on()
         player.play()
@@ -60,7 +61,7 @@ def wakeup():
 
 
 def standby():
-    player = stream_channel.current_player
+    player = get_channel_player(CHANNELS[toggle_channel.current_channel_id])
     if player:
         player.pause()
     else:

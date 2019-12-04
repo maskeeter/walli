@@ -27,37 +27,37 @@ def add_player_log(player: OMXPlayer):
     player.stopEvent += lambda _: player_log.info("Stop")
 
 
+def prepare_player(player):
+    player.playEvent += lambda _: player.show_video()
+    player.pauseEvent += lambda _: player.hide_video()
+    add_player_log(player)
+
+
 def extract_options(config: str):
     return [arg for arg in config if len(arg) and arg[0] != '#']
 
 
-def run_omx_player_live(url: str, config: str):
-    options = extract_options(config) if config else DEFAULT_CONFIG
-    options.append('--live')
-    player = OMXPlayer(url, args=options, dbus_name='org.mpris.MediaPlayer2.omxplayer.live')
-    prepare_player(player)
-    sleep(2.5)
-    if player.is_playing():
-        this.active_players['live'] = player
-        return player
+def run_omx_player_live(stream: str, config: str):
+    # TODO: find out how to add config correctly and what config is needed
+    player = OMXPlayer(stream, dbus_name='org.mpris.MediaPlayer2.omxplayer.live')
+    if player:
+        prepare_player(player)
+        if player.can_play():
+            this.active_players['live'] = player
+            return player
     raise Exception('player not available')
 
 
 def run_omx_player_file_loop(filename: str, config: str):
     options = extract_options(config) if config else DEFAULT_CONFIG
     options.append('--loop')
-    player = OMXPlayer(filename, args=options, dbus_name='org.mpris.MediaPlayer2.omxplayer.live')
-    add_player_log(player)
-    sleep(2.5)
-    if player.is_playing():
-        return player
+    player = OMXPlayer(filename, dbus_name='org.mpris.MediaPlayer2.omxplayer.live')
+    if player:
+        prepare_player(player)
+        if player.can_play():
+            this.active_players['outage'] = player
+            return player
     raise Exception('player not available')
-
-
-def prepare_player(player):
-    player.playEvent += lambda _: player.show_video()
-    player.pauseEvent += lambda _: player.hide_video()
-    add_player_log(player)
 
 
 def juggle(player_1: OMXPlayer, player_2: OMXPlayer, playlist: list):
