@@ -34,12 +34,13 @@ def prepare_player(player):
 
 
 def extract_options(config: str):
-    return [arg for arg in config if len(arg) and arg[0] != '#']
+    return [arg for arg in config.split('\n') if len(arg) and arg[0] != '#']
 
 
 def run_omx_player_live(stream: str, config: str):
     # TODO: find out how to add config correctly and what config is needed
-    player = OMXPlayer(stream, dbus_name='org.mpris.MediaPlayer2.omxplayer.live')
+    options = extract_options(config)
+    player = OMXPlayer(stream, args=options, dbus_name='org.mpris.MediaPlayer2.omxplayer.live')
     if player:
         prepare_player(player)
         if player.can_play():

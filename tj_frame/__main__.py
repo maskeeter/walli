@@ -50,6 +50,8 @@ def stream_channel(channel_id: int):
         kill_app("No configuration exists!")
 
 
+# TODO : account for OMXPlayerDeadError('Process is no longer alive, can\'t run command')
+
 def wakeup():
     player = get_channel_player(CHANNELS[toggle_channel.current_channel_id])
     if player:
@@ -80,18 +82,37 @@ def switch_button_action(btn):
         toggle_channel()
         logging.info(f'button just pressed')
     else:
-        logging.info(f'button held')
-        # btn.close()
+        logging.info(f'button held sensor')
+        if btn.sensor:
+            if btn.sensor.closed:
+                btn.sensor = start_sensor()
+            else:
+                btn.sensor.close()
     btn.was_held = False
 
 
 Button.was_held = False
 
+
+def start_sensor():
+    logging.info('Sensor Enabled ....')
+    d_sensor = DistanceSensor(echo=23, trigger=24, max_distance=1, threshold_distance=0.5, queue_len=20)
+    d_sensor.when_in_range = wakeup
+    d_sensor.when_out_of_range = standby
+    return d_sensor
+
+
+def stop_sensor(d_sensor: DistanceSensor):
+    logging.info('Sensor Disabled ....')
+    d_sensor.close()
+
+
+Button.sensor = None
+
 if __name__ == '__main__':
-    sensor = DistanceSensor(echo=23, trigger=24, max_distance=1, threshold_distance=0.5, partial=True)
-    sensor.when_in_range = wakeup
-    sensor.when_out_of_range = standby
+    sensor = start_sensor()
     button = Button(4, hold_time=3)
+    button.sensor = sensor
     button.when_held = mark_held
     button.when_released = switch_button_action
     pause()
