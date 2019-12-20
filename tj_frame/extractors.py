@@ -1,6 +1,9 @@
 from __future__ import unicode_literals
-from streamlink import Streamlink
+
+import traceback
+
 import youtube_dl
+from streamlink import Streamlink
 
 from tj_frame.utils import get_file_logger
 
@@ -28,9 +31,11 @@ def run_youtube_dl(list_id: str, config: dict):
         config['logger'] = flogging
     with youtube_dl.YoutubeDL(config) as ytdl:
         flogging.info('start extracting streams ...')
+        pl_data = {}
         try:
             pl_data = ytdl.extract_info(list_id, download=False)
-        except Exception:
+        except Exception as e:
+            traceback.print_exc()
             flogging.warning('failed to extract list')
         items = pl_data.get('entries')
         if items and len(items) > 0:

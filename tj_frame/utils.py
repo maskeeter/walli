@@ -1,5 +1,6 @@
 import json
 import logging
+import threading
 from multiprocessing import Pipe, Process
 
 from tj_frame import screen
@@ -21,6 +22,12 @@ def read_config(path):
     return None
 
 
+def read_options(config_path: str):
+    with open(config_path) as config_file:
+        config = config_file.read()
+        return [arg for arg in config.split('\n') if len(arg) and arg[0] != '#']
+
+
 def validate_url(url: str, validation: str = None):
     if url:
         if not validation or url.find(validation) > 0:
@@ -40,6 +47,15 @@ def run_in_separate_process(func):
         process = Process(target=func, name=func.__name__, args=arguments, kwargs=kwargs)
         process.start()
         return process, parent_conn
+
+    return wrapper
+
+
+def run_in_thread(fn):
+    def wrapper(*k, **kw):
+        t = threading.Thread(target=fn, args=k, kwargs=kw, daemon=True)
+        t.start()
+        return t
 
     return wrapper
 
