@@ -99,7 +99,7 @@ Button.was_held = False
 
 def start_sensor():
     logging.info('Sensor Enabled ....')
-    d_sensor = DistanceSensor(echo=5, trigger=6, max_distance=1, threshold_distance=0.2, partial=True)
+    d_sensor = DistanceSensor(echo=23, trigger=24, max_distance=1, threshold_distance=0.2, partial=True)
     d_sensor.when_in_range = wakeup
     d_sensor.when_out_of_range = standby
     return d_sensor

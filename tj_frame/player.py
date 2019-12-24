@@ -24,8 +24,8 @@ def prepare_player(player):
 def run_omx_player_playlist(playlist: list, config_path: str):
     options = read_options(config_path)
     cyc_list = cycle(playlist)
-    player = run_omx_player_stream(next(cyc_list), options)
-    player.exitEvent += lambda _, exit_code: player.load(next(cyc_list))
+    player = run_omx_player_stream(next(cyc_list).get('url'), options)
+    player.exitEvent += lambda _, exit_code: player.load(next(cyc_list).get('url'))
     return player
 
 
