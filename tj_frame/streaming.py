@@ -1,12 +1,13 @@
 import json
 import logging
 import sys
+from time import sleep
 
 from omxplayer import OMXPlayer
 
 from tj_frame.extractors import run_streamlink, run_youtube_dl
 from tj_frame.player import run_omx_player_playlist, run_omx_player_stream
-from tj_frame.utils import read_config, list_updated, validate_url, read_options
+from tj_frame.utils import read_config, validate_url, read_options, run_in_thread
 
 this = sys.modules[__name__]
 this.active_players = {}
@@ -23,12 +24,16 @@ def set_active_player(player: OMXPlayer, channel: str):
         this.active_players[channel] = player
 
 
-def extract_playlist(list_id: str, config: dict, playlist_path: str):
-    if list_updated(list_id):
-        if config:
-            playlist_data = run_youtube_dl(list_id, config)
-            with open(playlist_path, 'wt+') as playlist:
-                playlist.write(json.dumps(playlist_data))
+@run_in_thread
+def extract_playlist(list_id: str, config_path: str, playlist_path: str):
+    config = read_config(config_path)
+    if config:
+        config = config.get('youtube-dl')
+        playlist_data = run_youtube_dl(list_id, config)
+        logging.info(f'stream extracted ...')
+        with open(playlist_path, 'wt+') as playlist:
+            playlist.write(json.dumps(playlist_data))
+    sleep(3 * 60 * 60)
 
 
 def read_playlist(playlist_path: str):
@@ -72,13 +77,9 @@ def play_outage_footage(channel: str, message: str):
 def stream(channel: str, ch_config: dict):
     logging.info('streaming ...')
     try:
-        extractor_config = read_config(ch_config.get('extractor_config'))
         player_config_path = ch_config.get('player_config')
         if channel == 'pl':
-            ytdl_config = extractor_config.get('youtube-dl')
             playlist_path = ch_config.get('playlist_target')
-            extract_playlist(ch_config.get('list_id'), ytdl_config, playlist_path)
-            logging.info('playlist extracted ...')
             play_playlist(player_config_path, playlist_path)
         elif channel == 'live':
             streamlink_config = read_config(ch_config.get('extractor_config')).get('streamlink')

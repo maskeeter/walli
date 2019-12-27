@@ -76,15 +76,6 @@ def kill_app(message: str = None):
         logging.exception(message)
 
 
-def list_updated(list_id: str):
-    if list_updated.list_id != list_id:
-        list_updated.list_id = list_id
-        return True
-    return False
-
-
-list_updated.list_id = ''
-
 # TODO: WRAPPER DECORATOR TO MAINTAIN PLAYER IF IT CRASHES
 # try
 # func

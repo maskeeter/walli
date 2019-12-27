@@ -5,7 +5,7 @@ from signal import pause
 from gpiozero import DistanceSensor, Button
 
 from tj_frame import screen
-from tj_frame.streaming import get_active_player
+from tj_frame.streaming import get_active_player, extract_playlist
 from tj_frame.streaming import validate_channel_config, play_outage_footage, stream
 from tj_frame.utils import read_config, kill_app
 
@@ -112,8 +112,16 @@ def stop_sensor(d_sensor: DistanceSensor):
 
 Button.sensor = None
 
+
+def initialize_extractor():
+    pl_config = GLOBAL_CONFIG.get('pl')
+    t = extract_playlist(pl_config.get('list_id'), pl_config.get('extractor_config'), pl_config.get('playlist_target'))
+    t.join()
+
+
 if __name__ == '__main__':
     try:
+        initialize_extractor()
         sensor = start_sensor()
         button = Button(4, hold_time=3)
         button.sensor = sensor
@@ -123,3 +131,4 @@ if __name__ == '__main__':
     except KeyboardInterrupt:
         standby()
         logging.info("goodbye ....")
+        exit(1)
