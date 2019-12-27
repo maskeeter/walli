@@ -30,7 +30,7 @@ def extract_playlist(list_id: str, config_path: str, playlist_path: str):
     if config:
         config = config.get('youtube-dl')
         playlist_data = run_youtube_dl(list_id, config)
-        logging.info(f'stream extracted ...')
+        logging.info(f'playlist extracted ...')
         with open(playlist_path, 'wt+') as playlist:
             playlist.write(json.dumps(playlist_data))
     sleep(3 * 60 * 60)

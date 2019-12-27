@@ -23,6 +23,7 @@ def prepare_player(player):
 
 def run_omx_player_playlist(playlist: list, config_path: str):
     options = read_options(config_path)
+    options.append('--refresh')
     cyc_list = cycle(playlist)
     player = run_omx_player_stream(next(cyc_list).get('url'), options)
     player.exitEvent += lambda _, exit_code: player.load(next(cyc_list).get('url'))
@@ -32,7 +33,8 @@ def run_omx_player_playlist(playlist: list, config_path: str):
 def run_omx_player_stream(stream: str, options: list = None):
     if options is None:
         options = DEFAULT_CONFIG
-    player = OMXPlayer(stream, args=options, dbus_name='org.mpris.MediaPlayer2.omxplayer.live')
+    player = OMXPlayer(stream, args=options,
+                       dbus_name='org.mpris.MediaPlayer2.omxplayer.live')  # TODO: different name for each bsu
     if player:
         prepare_player(player)
         return player
