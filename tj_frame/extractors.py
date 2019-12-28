@@ -1,6 +1,8 @@
 from __future__ import unicode_literals
 
 import traceback
+from importlib import reload
+from subprocess import call
 
 import youtube_dl
 from streamlink import Streamlink
@@ -29,15 +31,21 @@ def run_youtube_dl(list_id: str, config: dict):
     flogging = get_file_logger('youtube-dl')
     if config:
         config['logger'] = flogging
-    with youtube_dl.YoutubeDL(config) as ytdl:
-        flogging.info('start extracting streams ...')
-        pl_data = {}
-        try:
-            pl_data = ytdl.extract_info(list_id, download=False)
-        except Exception as e:
-            traceback.print_exc()
-            flogging.warning('failed to extract list')
-        items = pl_data.get('entries')
-        if items and len(items) > 0:
-            return list(map(lambda video: {k: video[k] for k in ('playlist_index', 'duration', 'url')}, items))
-        flogging.warning('list is empty')
+        upgrade_youtube_dl()
+        with youtube_dl.YoutubeDL(config) as ytdl:
+            flogging.info('start extracting streams ...')
+            pl_data = {}
+            try:
+                pl_data = ytdl.extract_info(list_id, download=False)
+            except Exception as e:
+                traceback.print_exc()
+                flogging.warning('failed to extract list')
+            items = pl_data.get('entries')
+            if items and len(items) > 0:
+                return list(map(lambda video: {k: video[k] for k in ('playlist_index', 'duration', 'url')}, items))
+            flogging.warning('list is empty')
+
+
+def upgrade_youtube_dl():
+    call(['pip', 'install', '--upgrade', 'youtube-dl'])
+    reload(youtube_dl)

@@ -80,10 +80,10 @@
         },
         "iso3166": {
             "hashes": [
-                "sha256:2dcb10330a99de73189b62f4816035787d5e40764b20efc770c6eb35369b83ab",
-                "sha256:eaad12d1c5fb9394dc423a13b8084973960a7b392677039ce6fd932aa4a74bab"
+                "sha256:b07208703bd881a4f974e39fa013c4498dddd64913ada15f24be75d02ae68a44",
+                "sha256:b1e58dbcf50fbb2c9c418ec7a6057f0cdb30b8f822ac852f72e71ba769dae8c5"
             ],
-            "version": "==1.0"
+            "version": "==1.0.1"
         },
         "isodate": {
             "hashes": [
@@ -185,18 +185,18 @@
         },
         "websocket-client": {
             "hashes": [
-                "sha256:1151d5fb3a62dc129164292e1227655e4bbc5dd5340a5165dfae61128ec50aa9",
-                "sha256:1fd5520878b68b84b5748bb30e592b10d0a91529d5383f74f4964e72b297fd3a"
+                "sha256:0fc45c961324d79c781bab301359d5a1b00b13ad1b10415a4780229ef71a5549",
+                "sha256:d735b91d6d1692a6a181f2a8c9e0238e5f6373356f561bb9dc4c7af36f452010"
             ],
-            "version": "==0.56.0"
+            "version": "==0.57.0"
         },
         "youtube-dl": {
             "hashes": [
-                "sha256:43d6b991a34934fec2be20b93d4774ccc8642db1e5f0b8f1569f53b8d769af48",
-                "sha256:de2254dc38472b0e0e3ac4d1e95a9e636ec790af83e7b055e1e09f03eb61bb5c"
+                "sha256:54067a50647e2ba159544bf50f8c5f749cada39c7815ab097a89c11b820a0712",
+                "sha256:5f73e8c66c07d632b0fc69f715247fe76f38a28c0c5f13bd0651ecd193c2f1c6"
             ],
             "index": "pypi",
-            "version": "==2019.11.28"
+            "version": "==2019.12.25"
         }
     },
     "develop": {}

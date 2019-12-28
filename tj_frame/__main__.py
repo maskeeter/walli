@@ -121,12 +121,12 @@ def initialize_extractor():
 
 if __name__ == '__main__':
     try:
-        initialize_extractor()
         sensor = start_sensor()
         button = Button(4, hold_time=3)
         button.sensor = sensor
         button.when_held = mark_held
         button.when_released = switch_button_action
+        # stream_channel(1)
         pause()
     except KeyboardInterrupt:
         standby()
