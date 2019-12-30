@@ -1,8 +1,6 @@
-from itertools import cycle
-
 from omxplayer.player import OMXPlayer
 
-from tj_frame.utils import get_file_logger, read_options
+from tj_frame.utils import get_file_logger
 
 DEFAULT_CONFIG = ['--aspect-mode', 'Letterbox']
 
@@ -21,21 +19,15 @@ def prepare_player(player):
     add_player_log(player)
 
 
-def run_omx_player_playlist(playlist: list, config_path: str):
-    options = read_options(config_path)
-    options.append('--refresh')
-    cyc_list = cycle(playlist)
-    player = run_omx_player_stream(next(cyc_list).get('url'), options)
-    player.exitEvent += lambda _, exit_code: player.load(next(cyc_list).get('url'))
-    return player
-
-
 def run_omx_player_stream(stream: str, options: list = None):
     if options is None:
         options = DEFAULT_CONFIG
+    print(f'\nnew player spawned')
     player = OMXPlayer(stream, args=options,
                        dbus_name='org.mpris.MediaPlayer2.omxplayer.live')  # TODO: different name for each bsu
     if player:
+        print(f'\nbefore prepare')
         prepare_player(player)
+        print(f'\nafter prepare')
         return player
     raise Exception('player not available')

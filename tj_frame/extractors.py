@@ -27,23 +27,24 @@ def run_streamlink(url: str, config: dict):
         return streams.get('best').url
 
 
-def run_youtube_dl(list_id: str, config: dict):
+def run_youtube_dl_extract_stream(url: str, config: dict):
     flogging = get_file_logger('youtube-dl')
+    print(f"\nhi: {url}")
     if config:
         config['logger'] = flogging
-        upgrade_youtube_dl()
-        with youtube_dl.YoutubeDL(config) as ytdl:
-            flogging.info('start extracting streams ...')
-            pl_data = {}
-            try:
-                pl_data = ytdl.extract_info(list_id, download=False)
-            except Exception as e:
-                traceback.print_exc()
-                flogging.warning('failed to extract list')
-            items = pl_data.get('entries')
-            if items and len(items) > 0:
-                return list(map(lambda video: {k: video[k] for k in ('playlist_index', 'duration', 'url')}, items))
-            flogging.warning('list is empty')
+        if not run_youtube_dl_extract_stream.extractor:
+            run_youtube_dl_extract_stream.extractor = youtube_dl.YoutubeDL(config)
+        try:
+            video_data = run_youtube_dl_extract_stream.extractor.extract_info(url, download=False)
+            flogging.info(f'stream_extracted [{url}]')
+            return video_data['url']
+        except Exception as e:
+            traceback.print_exc()
+            flogging.warning('failed to extract url')
+            upgrade_youtube_dl()
+
+
+run_youtube_dl_extract_stream.extractor = None
 
 
 def upgrade_youtube_dl():

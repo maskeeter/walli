@@ -1,13 +1,13 @@
 import json
 import logging
 import sys
-from time import sleep
+from itertools import cycle
 
 from omxplayer import OMXPlayer
 
-from tj_frame.extractors import run_streamlink, run_youtube_dl
-from tj_frame.player import run_omx_player_playlist, run_omx_player_stream
-from tj_frame.utils import read_config, validate_url, read_options, run_in_thread
+from tj_frame.extractors import run_streamlink, run_youtube_dl_extract_stream
+from tj_frame.player import run_omx_player_stream
+from tj_frame.utils import read_config, validate_url, read_options
 
 this = sys.modules[__name__]
 this.active_players = {}
@@ -24,34 +24,50 @@ def set_active_player(player: OMXPlayer, channel: str):
         this.active_players[channel] = player
 
 
-@run_in_thread
-def extract_playlist(list_id: str, config_path: str, playlist_path: str):
-    config = read_config(config_path)
-    if config:
-        config = config.get('youtube-dl')
-        playlist_data = run_youtube_dl(list_id, config)
-        logging.info(f'playlist extracted ...')
-        with open(playlist_path, 'wt+') as playlist:
-            playlist.write(json.dumps(playlist_data))
-    sleep(3 * 60 * 60)
-
-
-def read_playlist(playlist_path: str):
+def playlist(playlist_path: str):
     try:
+        # TODO: replace with extract playlist
         with open(playlist_path, 'rt') as playlist_file:
-            return json.load(playlist_file)
+            pl = json.load(playlist_file)
+        if len(pl):
+            playlist.entries = cycle(pl)
     except (ValueError, FileNotFoundError) as e:
         raise Exception('invalid playlist', e)
 
 
-def play_playlist(config_path: str, playlist_path: str):
-    playlist = read_playlist(playlist_path)
-    if len(playlist):
-        player = run_omx_player_playlist(playlist, config_path)
+playlist.entries = None
+
+
+def play_and_prepare_next_video(current_player, config, exit_code):
+    logging.info(f"Exit: {exit_code}")
+    if current_player:
+        print('before load')
+        current_player.load(play_playlist.next)
+        print('after load')
+        print(next(playlist.entries))
+        print(current_player.can_play())
+        play_playlist.next = run_youtube_dl_extract_stream(next(playlist.entries).get('webpage_url'), config)
+        print('after extractt')
+
+
+def play_playlist(player_config_path: str, extractor_config_path: str):
+    extractor_config = read_config(extractor_config_path).get('youtube-dl')
+    if playlist.entries:
+        options = read_options(player_config_path) + ['--refresh']
+        print(f'hi: {options}')
+        play_playlist.next = run_youtube_dl_extract_stream(next(playlist.entries).get('webpage_url'), extractor_config)
+        player = run_omx_player_stream(play_playlist.next, options)
+        print('\nbefore adding exit')
+        player.exitEvent += lambda current_player, exit_code: play_and_prepare_next_video(current_player,
+                                                                                          extractor_config, exit_code)
+        print('\nafter adding exit')
         if player:
             set_active_player(player, 'pl')
             return
     raise Exception("cannot play playlist")
+
+
+play_playlist.next = ''
 
 
 def play_live_stream(url: str, config_path: str):
@@ -79,8 +95,10 @@ def stream(channel: str, ch_config: dict):
     try:
         player_config_path = ch_config.get('player_config')
         if channel == 'pl':
+            ytdl_config_path = ch_config.get('extractor_config')
             playlist_path = ch_config.get('playlist_target')
-            play_playlist(player_config_path, playlist_path)
+            playlist(playlist_path)
+            play_playlist(player_config_path, ytdl_config_path)
         elif channel == 'live':
             streamlink_config = read_config(ch_config.get('extractor_config')).get('streamlink')
             stream_url = validate_url(ch_config.get('url'), 'www.youtube.com')
