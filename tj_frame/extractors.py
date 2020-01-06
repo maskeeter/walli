@@ -29,7 +29,6 @@ def run_streamlink(url: str, config: dict):
 
 def run_youtube_dl_extract_stream(url: str, config: dict):
     flogging = get_file_logger('youtube-dl')
-    print(f"\nhi: {url}")
     if config:
         config['logger'] = flogging
         if not run_youtube_dl_extract_stream.extractor:
@@ -37,7 +36,7 @@ def run_youtube_dl_extract_stream(url: str, config: dict):
         try:
             video_data = run_youtube_dl_extract_stream.extractor.extract_info(url, download=False)
             flogging.info(f'stream_extracted [{url}]')
-            return video_data['url']
+            return {'url': video_data['url'], 'duration': video_data['duration']}
         except Exception as e:
             traceback.print_exc()
             flogging.warning('failed to extract url')

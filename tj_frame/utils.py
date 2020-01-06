@@ -1,5 +1,7 @@
 import json
 import logging
+import random
+import string
 import threading
 from multiprocessing import Pipe, Process
 
@@ -75,6 +77,9 @@ def kill_app(message: str = None):
     if message:
         logging.exception(message)
 
+
+def id_generator(size=6, chars=string.ascii_uppercase):
+    return ''.join(random.choice(chars) for _ in range(size))
 
 # TODO: WRAPPER DECORATOR TO MAINTAIN PLAYER IF IT CRASHES
 # try
