@@ -78,7 +78,7 @@ def kill_app(message: str = None):
         logging.exception(message)
 
 
-def id_generator(size=6, chars=string.ascii_uppercase):
+def id_generator(size=6, chars=string.ascii_letters):
     return ''.join(random.choice(chars) for _ in range(size))
 
 # TODO: WRAPPER DECORATOR TO MAINTAIN PLAYER IF IT CRASHES

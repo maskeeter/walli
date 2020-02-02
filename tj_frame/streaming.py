@@ -1,11 +1,12 @@
-import json
 import logging
+import os
+import re
 import sys
 
 from omxplayer import OMXPlayer
 
-from tj_frame.extractors import run_streamlink
-from tj_frame.player import run_omx_player_stream, run_omx_player_juggle_play_extract, initialize_players
+from tj_frame.extractors import run_streamlink, extract_playlist, renew_playlist_every_day_at
+from tj_frame.player import run_omx_player_stream
 from tj_frame.utils import read_config, validate_url, read_options
 
 this = sys.modules[__name__]
@@ -24,17 +25,21 @@ def set_active_player(player: OMXPlayer, channel: str):
     this.active_players[channel] = player
 
 
-def play_playlist(player_config_path: str, extractor_config_path: str, playlist_path: str):
-    extractor_config = read_config(extractor_config_path).get('youtube-dl')
-    options = read_options(player_config_path) + ['--refresh']
+def play_playlist(player_config_path: str, extractor_config_path: str, list_id: str, playlist_target: str):
+    extractor_config = read_config(extractor_config_path)
+    youtube_dl_config = extractor_config.get('youtube-dl')
+    renew_hour = extractor_config.get('cron')
+    options = read_options(player_config_path) + ['--loop']
+    videos_folder = re.search(r'./(.*)/', youtube_dl_config.get("outtmpl")).group(1)
     try:
-        with open(playlist_path, 'rt') as playlist_file:
-            pl = json.load(playlist_file)
-        if len(pl):
-            player_1, player_2 = initialize_players(INTRO_VIDEO, options)
-            player_1.playEvent += lambda p: set_active_player(p, 'pl')
-            player_2.playEvent += lambda p: set_active_player(p, 'pl')
-            run_omx_player_juggle_play_extract(player_1, player_2, extractor_config, pl)
+        if not os.path.isfile(f'{playlist_target}.mp4'):
+            extract_playlist(list_id, videos_folder, playlist_target, youtube_dl_config)
+            renew_playlist_every_day_at(renew_hour)
+        player = run_omx_player_stream(f'{playlist_target}.mp4', options)
+
+        if player:
+            set_active_player(player, 'pl')
+            return
     except (ValueError, FileNotFoundError) as e:
         raise Exception('invalid playlist', e)
 
@@ -65,8 +70,9 @@ def stream(channel: str, ch_config: dict):
         player_config_path = ch_config.get('player_config')
         if channel == 'pl':
             ytdl_config_path = ch_config.get('extractor_config')
-            playlist_path = ch_config.get('playlist_target')
-            play_playlist(player_config_path, ytdl_config_path, playlist_path)
+            list_id = ch_config.get('list_id')
+            playlist_target = ch_config.get('playlist_target')
+            play_playlist(player_config_path, ytdl_config_path, list_id, playlist_target)
         elif channel == 'live':
             streamlink_config = read_config(ch_config.get('extractor_config')).get('streamlink')
             stream_url = validate_url(ch_config.get('url'), 'www.youtube.com')

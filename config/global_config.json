@@ -3,7 +3,7 @@
     "list_id": "PLyU6zePFLJ-DuPIKw97JoAB7-EglSyMQ-",
     "player_config": "config/player.config",
     "extractor_config": "config/extractor.json",
-    "playlist_target": "playlist.json"
+    "playlist_target": "playlist"
   },
   "gif": {
     "url": "http://tv.giphy.com/?username=",

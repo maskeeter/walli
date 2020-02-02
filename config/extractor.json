@@ -3,7 +3,10 @@
     "format": "best[height>=360][height<=720][ext=mp4]",
     "ignoreerrors": true,
     "playlistrandom": true,
-    "dump_single_json": true
+    "dump_single_json": true,
+    "outtmpl": "./vids/%(id)s.%(ext)s",
+    "maxdownloads": 100
   },
-  "streamlink": {}
+  "streamlink": {},
+  "cron": 5
 }
