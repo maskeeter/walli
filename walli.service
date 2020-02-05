@@ -1,0 +1,13 @@
+[Unit]
+Description=Walli Launcher
+After=network.target
+
+[Service]
+User=pi
+Type=idle
+Environment="PYTHONPATH=/home/pi/.local/lib/python3.7/site-packages"
+WorkingDirectory=/home/pi/frame
+ExecStart=/bin/sh -c '/home/pi/.local/bin/pipenv run python -m tj_frame'
+
+[Install]
+WantedBy=multi-user.target

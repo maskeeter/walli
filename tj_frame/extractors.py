@@ -1,6 +1,7 @@
 from __future__ import unicode_literals
 
 import os
+import shutil
 import traceback
 from importlib import reload
 from os import listdir
@@ -30,16 +31,12 @@ def run_streamlink(url: str, config: dict):
 
 
 def extract_playlist(playlist_id: str, videos_folder: str, target: str, config: dict):
-    run_youtube_dl(playlist_id, config, videos_folder)
+    videos_path = f"./{videos_folder}"
+    run_youtube_dl(playlist_id, config, videos_path)
     with open('vids.txt', 'wt+') as list_file:
         list_file.writelines([f'file \'{videos_folder}/{f}\'\n' for f in listdir(videos_folder) if f.endswith(".mp4")])
     os.system(f'ffmpeg -loglevel quiet -y -f concat -safe 0 -i vids.txt -c copy {target}.mp4')
-    os.remove(f'{videos_folder}/*.mp4')
-
-
-def renew_playlist_every_day_at(renew_hour: int):
-    # TODO: register a cron to re-extract file if not playing, if playing snooze
-    pass
+    shutil.rmtree(videos_path, ignore_errors=True)
 
 
 def run_youtube_dl(list_id: str, config: dict, videos_path: str):

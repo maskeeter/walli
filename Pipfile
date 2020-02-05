@@ -11,6 +11,7 @@ dbus-python='*'
 omxplayer-wrapper = "*"
 streamlink = "*"
 youtube-dl = "*"
+apscheduler = "*"
 
 [requires]
 python_version = "3.7"

@@ -8,5 +8,9 @@
     "maxdownloads": 100
   },
   "streamlink": {},
-  "cron": 5
+  "cron": {
+    "day_of_week": "mon",
+    "hour": 3,
+    "minute": 30
+  }
 }
