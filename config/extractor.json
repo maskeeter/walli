@@ -4,13 +4,12 @@
     "ignoreerrors": true,
     "playlistrandom": true,
     "outtmpl": "./vids/%(id)s.%(ext)s",
-    "maxdownloads": 100,
-    "recodevideo": "mkv"
+    "maxdownloads": 50
   },
   "streamlink": {},
   "cron": {
     "day_of_week": "mon",
-    "hour": 3,
+    "hour": 2,
     "minute": 30
   }
 }

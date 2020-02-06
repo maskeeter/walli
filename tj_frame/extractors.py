@@ -4,7 +4,6 @@ import os
 import shutil
 import traceback
 from importlib import reload
-from os import listdir
 from subprocess import call
 
 import youtube_dl
@@ -33,9 +32,21 @@ def run_streamlink(url: str, config: dict):
 def extract_playlist(playlist_id: str, videos_folder: str, target: str, config: dict):
     videos_path = f"./{videos_folder}"
     run_youtube_dl(playlist_id, config, videos_path)
-    with open('vids.txt', 'wt+') as list_file:
-        list_file.writelines([f'file \'{videos_folder}/{f}\'\n' for f in listdir(videos_folder) if f.endswith(".mp4")])
-    os.system(f'ffmpeg -loglevel quiet -y -f concat -safe 0 -i vids.txt -c copy {target}.mp4')
+    post_process_videos(videos_path, target)
+
+
+def post_process_videos(videos_path: str, target: str):
+    flogging = get_file_logger('youtube-dl')
+    flogging.info("converting files to intermediate format")
+    videos = [v.split('.')[0] for v in os.listdir(videos_path)]
+    for video in videos:
+        os.system(
+            f'ffmpeg -y -loglevel panic -i {videos_path}/{video}.mp4 -c copy -bsf h264_mp4toannexb -an {videos_path}/{video}.ts')
+        if os.path.exists(f'{video}.mp4'):
+            os.remove(f'{video}.mp4')
+    flogging.info("merging files to output")
+    inputs = [f'{videos_path}/{v}.ts' for v in videos]
+    os.system(f'ffmpeg -y -loglevel panic -i "concat:{"|".join(inputs)}" -c copy -bsf:a aac_adtstoasc {target}.mp4')
     shutil.rmtree(videos_path, ignore_errors=True)
 
 

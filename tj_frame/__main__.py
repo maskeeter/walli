@@ -2,6 +2,7 @@ import logging
 import sys
 import traceback
 from signal import pause
+from time import sleep
 
 from gpiozero import DistanceSensor, Button
 
@@ -122,6 +123,8 @@ if __name__ == '__main__':
         # button.when_held = mark_held
         # button.when_released = switch_button_action
         stream_channel(0)
+        sleep(1200)
+        get_active_player('pl').pause()
         pause()
     except KeyboardInterrupt:
         standby()

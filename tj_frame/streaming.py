@@ -12,7 +12,7 @@ from tj_frame.utils import read_config, validate_url, read_options
 
 this = sys.modules[__name__]
 this.active_players = {}
-INTRO_VIDEO = {'url': 'distributor_20th_century_fox-DWEU.mkv', 'duration': 22}
+INTRO_VIDEO = {'url': 'distributor_20th_century_fox-DWEU.mp4', 'duration': 22}
 
 
 def get_active_player(channel: str):
@@ -33,7 +33,6 @@ def play_playlist(player_options: list, extractor_config: dict, list_id: str, pl
     videos_folder = re.search(r'./(.*)/', youtube_dl_config.get("outtmpl")).group(1)
     try:
         if not os.path.isfile(f'{playlist_target}.mp4'):
-            play_outage_footage('pl', 'downloading playlist!')
             extract_playlist(list_id, videos_folder, playlist_target, youtube_dl_config)
         player = run_omx_player_stream(f'{playlist_target}.mp4', options, pause)
         if player:
@@ -76,7 +75,7 @@ def play_live_stream(url: str, config_path: str):
 def play_outage_footage(channel: str, message: str):
     logging.warning(f"{channel} is unavailable, error: {message}")
     options = ['--loop', '--aspect-mode', 'fill']
-    player = run_omx_player_stream('file_example_MP4_1280_10MG.mp4', options)
+    player = run_omx_player_stream('outage.mp4', options)
     if player:
         set_active_player(player, 'outage')
         return
