@@ -26,40 +26,41 @@ def set_active_player(player: OMXPlayer, channel: str):
     this.active_players[channel] = player
 
 
-def play_playlist(player_config: str, extractor_config: dict, list_id: str, playlist_target: str):
+def play_playlist(player_options: list, extractor_config: dict, list_id: str, playlist_target: str,
+                  pause: bool):
     youtube_dl_config = extractor_config.get('youtube-dl')
-    options = player_config + ['--loop']
+    options = player_options + ['--loop']
     videos_folder = re.search(r'./(.*)/', youtube_dl_config.get("outtmpl")).group(1)
     try:
         if not os.path.isfile(f'{playlist_target}.mp4'):
+            play_outage_footage('pl', 'downloading playlist!')
             extract_playlist(list_id, videos_folder, playlist_target, youtube_dl_config)
-        player = run_omx_player_stream(f'{playlist_target}.mp4', options)
+        player = run_omx_player_stream(f'{playlist_target}.mp4', options, pause)
         if player:
             set_active_player(player, 'pl')
-            schedule_change_tapes(options, extractor_config, list_id, playlist_target)
             return
     except (ValueError, FileNotFoundError) as e:
         raise Exception('invalid playlist', e)
 
 
-def schedule_change_tapes(player_config: str, extractor_config: dict, list_id: str, playlist_target: str):
+def schedule_change_tapes(player_options: list, extractor_config: dict, list_id: str, playlist_target: str):
     cron = extractor_config.get("cron")
     scheduler = BackgroundScheduler()
     scheduler.start()
     scheduler.add_job(change_tape, 'cron', day_of_week=cron.get("day_of_week"), hour=cron.get("hour"),
                       minute=cron.get("minute"),
-                      args=(player_config, extractor_config, list_id, playlist_target),
+                      args=(player_options, extractor_config, list_id, playlist_target),
                       name='playlist download job')
 
 
-def change_tape(player_config: str, extractor_config: str, list_id: str, playlist_target: str):
+def change_tape(player_options: list, extractor_config: dict, list_id: str, playlist_target: str):
     playlist_player = get_active_player('pl')
-    if playlist_player and playlist_player.is_playing():
-        playlist_player.pauseEvent += lambda _: change_tape(player_config, extractor_config, list_id, playlist_target)
+    if playlist_player and playlist_player.can_play() and playlist_player.is_playing():
+        playlist_player.pauseEvent += lambda _: change_tape(player_options, extractor_config, list_id, playlist_target)
         return
     playlist_player.quit()
     os.remove(f'{playlist_target}.mp4')
-    play_playlist(player_config, extractor_config, list_id, playlist_target)
+    play_playlist(player_options, extractor_config, list_id, playlist_target, True)
 
 
 def play_live_stream(url: str, config_path: str):
@@ -87,12 +88,13 @@ def stream(channel: str, ch_config: dict):
     try:
         player_config_path = ch_config.get('player_config')
         if channel == 'pl':
-            player_config = read_options(player_config_path)
+            player_options = read_options(player_config_path)
             extractor_config_path = ch_config.get('extractor_config')
             extractor_config = read_config(extractor_config_path)
             list_id = ch_config.get('list_id')
             playlist_target = ch_config.get('playlist_target')
-            play_playlist(player_config, extractor_config, list_id, playlist_target)
+            play_playlist(player_options, extractor_config, list_id, playlist_target, False)
+            schedule_change_tapes(player_options, extractor_config, list_id, playlist_target)
         elif channel == 'live':
             streamlink_config = read_config(ch_config.get('extractor_config')).get('streamlink')
             stream_url = validate_url(ch_config.get('url'), 'www.youtube.com')

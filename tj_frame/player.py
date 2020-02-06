@@ -1,5 +1,6 @@
 import logging
 import sys
+from time import sleep
 
 from omxplayer.player import OMXPlayer
 
@@ -23,11 +24,12 @@ def prepare_player(player: OMXPlayer, name: str = "player"):
     add_player_log(player, name)
 
 
-def run_omx_player_stream(stream: str, options: list = None):
+def run_omx_player_stream(stream: str, options: list = None, pause: bool = False):
     if options is None:
         options = DEFAULT_CONFIG
     player_name = f'org.mpris.MediaPlayer2.omxplayer.{id_generator()}'
-    player = OMXPlayer(stream, args=options, dbus_name=player_name)
+    player = OMXPlayer(stream, args=options, dbus_name=player_name, pause=pause)
+    sleep(3)
     logging.info(f'player created: {player_name}')
     if player:
         prepare_player(player)
