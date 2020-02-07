@@ -12,6 +12,7 @@ omxplayer-wrapper = "*"
 streamlink = "*"
 youtube-dl = "*"
 apscheduler = "*"
+"rpi.gpio" = "*"
 
 [requires]
 python_version = "3.7"

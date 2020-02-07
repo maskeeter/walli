@@ -2,7 +2,6 @@ import logging
 import sys
 import traceback
 from signal import pause
-from time import sleep
 
 from gpiozero import DistanceSensor, Button
 
@@ -25,6 +24,10 @@ def toggle_channel():
     player = get_active_player(CHANNELS[toggle_channel.current_channel_id])
     if player:
         player.play()
+        screen.turn_on()
+        outage = get_active_player('outage')
+        if outage and outage.is_playing():
+            outage.pause()
     else:
         stream_channel(toggle_channel.current_channel_id)
 
@@ -101,7 +104,7 @@ Button.was_held = False
 
 def start_sensor():
     logging.info('Sensor Enabled ....')
-    d_sensor = DistanceSensor(echo=23, trigger=24, max_distance=1, threshold_distance=0.2, partial=True)
+    d_sensor = DistanceSensor(echo=24, trigger=23, max_distance=1, threshold_distance=0.2, partial=True)
     d_sensor.when_in_range = wakeup
     d_sensor.when_out_of_range = standby
     return d_sensor
@@ -114,17 +117,13 @@ def stop_sensor(d_sensor: DistanceSensor):
 
 Button.sensor = None
 
-
 if __name__ == '__main__':
     try:
-        # sensor = start_sensor()
-        # button = Button(4, hold_time=3)
-        # button.sensor = sensor
-        # button.when_held = mark_held
-        # button.when_released = switch_button_action
-        stream_channel(0)
-        sleep(1200)
-        get_active_player('pl').pause()
+        sensor = start_sensor()
+        button = Button(4, hold_time=3)
+        button.sensor = sensor
+        button.when_held = mark_held
+        button.when_released = switch_button_action
         pause()
     except KeyboardInterrupt:
         standby()
