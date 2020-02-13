@@ -58,8 +58,6 @@ def stream_channel(channel_id: int):
         kill_app("No configuration exists!")
 
 
-# TODO : account for OMXPlayerDeadError('Process is no longer alive, can\'t run command')
-
 def wakeup():
     player = get_active_player(CHANNELS[toggle_channel.current_channel_id])
     if player:
@@ -88,9 +86,9 @@ def mark_held(btn):
 def switch_button_action(btn):
     if not btn.was_held:
         toggle_channel()
-        logging.info(f'button just pressed')
+        logging.info(f'button pressed')
     else:
-        logging.info(f'button held sensor')
+        logging.info(f'button held')
         if btn.sensor:
             if btn.sensor.closed:
                 btn.sensor = start_sensor()
