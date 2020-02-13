@@ -5,12 +5,6 @@
     "extractor_config": "config/extractor.json",
     "playlist_target": "playlist"
   },
-  "gif": {
-    "url": "http://tv.giphy.com/?username=",
-    "hashtags": [
-      "kimmyschmidt"
-    ]
-  },
   "live": {
     "url": "https://www.youtube.com/watch?v=933-mhry0Bc",
     "extractor_config": "config/extractor.json",
