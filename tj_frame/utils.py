@@ -81,12 +81,6 @@ def kill_app(message: str = None):
 def id_generator(size=6, chars=string.ascii_letters):
     return ''.join(random.choice(chars) for _ in range(size))
 
-# TODO: WRAPPER DECORATOR TO MAINTAIN PLAYER IF IT CRASHES
-# try
-# func
-# except DBusConnectionError as e:
-# pass
-# except OMXPlayerDeadError as e:
-# pass
-# except FileNotFoundError as e:
-# pass
+
+def toggle(cycle_list: list, current: int) -> int:
+    return current + 1 if current < len(cycle_list) - 1 else 0

@@ -1,4 +1,5 @@
 import logging
+import os
 import sys
 from time import sleep
 
@@ -35,3 +36,7 @@ def run_omx_player_stream(stream: str, options: list = None, pause: bool = False
         prepare_player(player)
         return player
     raise Exception('player not available')
+
+
+def kill_player():
+    os.system("pkill -f omxplayer*")

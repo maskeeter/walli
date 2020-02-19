@@ -6,6 +6,7 @@ import sys
 from apscheduler.schedulers.background import BackgroundScheduler
 from omxplayer import OMXPlayer
 
+from tj_frame import screen
 from tj_frame.extractors import run_streamlink, extract_playlist
 from tj_frame.player import run_omx_player_stream
 from tj_frame.utils import read_config, validate_url, read_options
@@ -23,6 +24,7 @@ def get_active_player(channel: str):
 
 def set_active_player(player: OMXPlayer, channel: str):
     logging.info(f"Set active player {player} for channel {channel}")
+    player.exitEvent += lambda _, exit_code: handle_player_error(channel, exit_code)
     this.active_players[channel] = player
 
 
@@ -72,16 +74,6 @@ def play_live_stream(url: str, config_path: str):
     raise Exception(f'cannot play live stream {url}')
 
 
-def play_outage_footage(channel: str, message: str):
-    logging.warning(f"{channel} is unavailable, error: {message}")
-    options = ['--loop', '--aspect-mode', 'fill']
-    player = run_omx_player_stream('outage.mp4', options)
-    if player:
-        set_active_player(player, 'outage')
-        return
-    raise Exception(f'cannot play outage footage')
-
-
 def stream(channel: str, ch_config: dict):
     logging.info('streaming ...')
     try:
@@ -113,3 +105,31 @@ def validate_channel_config(config: dict, channel: str):
             or channel == 'live' and ("url" and "player_config" in config):
         return True
     return False
+
+
+def stop_outage():
+    player = get_active_player('outage')
+    if player and player.is_playing():
+        player.pause()
+
+
+def play_outage(channel: str, message: str):
+    if message:
+        logging.warning(f"{channel} is unavailable, error: {message}")
+    channel_player = get_active_player(channel)
+    if channel_player and channel_player.is_playing():
+        channel_player.quit()
+    try:
+        options = ['--loop', '--aspect-mode', 'fill']
+        player = run_omx_player_stream('outage.mp4', options)
+        if player:
+            set_active_player(player, 'outage')
+            return
+    except Exception as e:
+        logging.error(e)
+        screen.turn_off()
+
+
+def handle_player_error(channel: str, exit_status: int):
+    if exit_status < 0:
+        play_outage(channel, f'streaming failed during playing')

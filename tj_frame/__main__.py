@@ -1,94 +1,76 @@
 import logging
 import sys
-import traceback
 from signal import pause
 
 from gpiozero import DistanceSensor, Button
 
 from tj_frame import screen
-from tj_frame.streaming import get_active_player
-from tj_frame.streaming import validate_channel_config, play_outage_footage, stream
-from tj_frame.utils import read_config, kill_app
+from tj_frame.streaming import get_active_player, play_outage, stop_outage
+from tj_frame.streaming import validate_channel_config, stream
+from tj_frame.utils import read_config, kill_app, toggle
 
 CHANNELS = ['pl', 'live']
 logging.basicConfig(format='%(asctime)s - %(message)s', level=logging.INFO)
-GLOBAL_CONFIG = read_config("config/global_config.json")
 
 
 def toggle_channel():
     current_player = get_active_player(CHANNELS[toggle_channel.current_channel_id])
     if current_player:
         current_player.pause()
-    toggle_channel.current_channel_id = toggle_channel.current_channel_id + 1 \
-        if toggle_channel.current_channel_id < len(CHANNELS) - 1 else 0
-    player = get_active_player(CHANNELS[toggle_channel.current_channel_id])
-    if player:
-        player.play()
-        screen.turn_on()
-        outage = get_active_player('outage')
-        if outage and outage.is_playing():
-            outage.pause()
-    else:
-        stream_channel(toggle_channel.current_channel_id)
+    toggle_channel.current_channel_id = toggle(CHANNELS, toggle_channel.current_channel_id)
+    wakeup()
 
 
 toggle_channel.current_channel_id = 0
 
 
 def stream_channel(channel_id: int):
+    config = read_config("config/global_config.json")
     channel = CHANNELS[channel_id]
-    ch_config = GLOBAL_CONFIG.get(channel)
-    if GLOBAL_CONFIG:
+    if config and channel and validate_channel_config(config[channel], channel):
         try:
-            if not validate_channel_config(ch_config, channel):
-                play_outage_footage(channel, "invalid config")
-            else:
-                stream(channel, ch_config)
-                screen.turn_on()
-                outage = get_active_player('outage')
-                if outage and outage.is_playing():
-                    outage.pause()
+            stop_outage()
+            stream(channel, config[channel])
         except Exception as e:
-            traceback.print_exc()
-            main_channel = get_active_player(channel)
-            if main_channel and main_channel.is_playing():
-                main_channel.pause()
-            play_outage_footage(channel, 'streaming failed')
-    else:
-        kill_app("No configuration exists!")
+            play_outage(channel, f'streaming failed')
+        finally:
+            return
+    kill_app("No configuration exists!")
 
 
 def wakeup():
     player = get_active_player(CHANNELS[toggle_channel.current_channel_id])
-    if player:
+    try:
         player.play()
-        screen.turn_on()
-    else:
+    except Exception as e:
+        logging.error("player is disfunctional, reason: ", e)
         stream_channel(toggle_channel.current_channel_id)
-    logging.info("play mode ...")
+    finally:
+        screen.turn_on()
+        logging.info("play mode ...")
 
 
 def standby():
     player = get_active_player(CHANNELS[toggle_channel.current_channel_id])
-    if player:
+    try:
         player.pause()
-    else:
+    except Exception as e:
         logging.warning("doesn't have any player")
-    screen.turn_off()
-    logging.info("standby mode ...")
+    finally:
+        screen.turn_off()
+        logging.info("standby mode ...")
 
 
 def mark_held(btn):
     btn.was_held = True
-    logging.info('hold marked')
 
 
 def switch_button_action(btn):
     if not btn.was_held:
         toggle_channel()
-        logging.info(f'button pressed')
+        logging.info(f'button pressed!')
     else:
-        logging.info(f'button held')
+        logging.info(f'button held!')
         if btn.sensor:
             if btn.sensor.closed:
                 btn.sensor = start_sensor()
@@ -102,7 +84,7 @@ Button.was_held = False
 
 def start_sensor():
     logging.info('Sensor Enabled ....')
-    d_sensor = DistanceSensor(echo=24, trigger=23, max_distance=1, threshold_distance=0.2, partial=True)
+    d_sensor = DistanceSensor(echo=24, trigger=23, max_distance=1, threshold_distance=0.5, partial=True)
     d_sensor.when_in_range = wakeup
     d_sensor.when_out_of_range = standby
     return d_sensor
