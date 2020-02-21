@@ -4,7 +4,7 @@
     "ignoreerrors": true,
     "playlistrandom": true,
     "outtmpl": "./vids/%(id)s.%(ext)s",
-    "max_downloads": 25
+    "max_downloads": 20
   },
   "streamlink": {},
   "cron": {

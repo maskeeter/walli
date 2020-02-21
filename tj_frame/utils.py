@@ -1,5 +1,6 @@
 import json
 import logging
+import os
 import random
 import string
 import threading
@@ -84,3 +85,7 @@ def id_generator(size=6, chars=string.ascii_letters):
 
 def toggle(cycle_list: list, current: int) -> int:
     return current + 1 if current < len(cycle_list) - 1 else 0
+
+
+def reboot_device():
+    os.system("sudo reboot")

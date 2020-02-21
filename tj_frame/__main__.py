@@ -7,7 +7,7 @@ from gpiozero import DistanceSensor, Button
 from tj_frame import screen
 from tj_frame.streaming import get_active_player, play_outage, stop_outage
 from tj_frame.streaming import validate_channel_config, stream
-from tj_frame.utils import read_config, kill_app, toggle
+from tj_frame.utils import read_config, kill_app, toggle, reboot_device
 
 CHANNELS = ['pl', 'live']
 logging.basicConfig(format='%(asctime)s - %(message)s', level=logging.INFO)
@@ -71,11 +71,14 @@ def switch_button_action(btn):
         logging.info(f'button pressed!')
     else:
         logging.info(f'button held!')
-        if btn.sensor:
-            if btn.sensor.closed:
-                btn.sensor = start_sensor()
-            else:
-                btn.sensor.close()
+        if btn.held_time > 10:
+            reboot_device()
+        else:
+            if btn.sensor:
+                if btn.sensor.closed:
+                    btn.sensor = start_sensor()
+                else:
+                    btn.sensor.close()
     btn.was_held = False
 
 
@@ -99,6 +102,7 @@ Button.sensor = None
 
 if __name__ == '__main__':
     try:
+        screen.turn_off()
         sensor = start_sensor()
         button = Button(4, hold_time=3)
         button.sensor = sensor
