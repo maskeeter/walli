@@ -2,7 +2,7 @@
 
 a raspberry pi mini tv with youtube/gif channels that will work only when you're standing in front of it.
 
-Use pipenv to build the application:
+Use pipenv to build the Environment:
 
 ```
 pipenv install /project/path
