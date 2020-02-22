@@ -42,7 +42,7 @@ sudo systemctl enable walli.service
 - sensor will wake up the player when anybody is standing closer than threshold (currently hardcoded to 0.8m)
 - button press will either be:
   **short** will toggle the channel
-  **long** will enable/disable the sensor
+  **long** will enable/disable the sensor (and keep player at current state.)
 
 ## Circuit
 ![Alt text](circuit.png?raw=true "Title")
