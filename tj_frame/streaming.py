@@ -24,7 +24,6 @@ def get_active_player(channel: str):
 
 def set_active_player(player: OMXPlayer, channel: str):
     logging.info(f"Set active player {player} for channel {channel}")
-    player.exitEvent += lambda _, exit_code: handle_player_error(channel, exit_code)
     this.active_players[channel] = player
 
 
@@ -131,5 +130,4 @@ def play_outage(channel: str, message: str):
 
 
 def handle_player_error(channel: str, exit_status: int):
-    if exit_status < 0:
-        play_outage(channel, f'streaming failed during playing')
+    pass

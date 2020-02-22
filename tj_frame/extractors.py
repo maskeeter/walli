@@ -8,6 +8,7 @@ from subprocess import call
 
 import youtube_dl
 from streamlink import Streamlink
+from youtube_dl import MaxDownloadsReached
 
 from tj_frame.utils import get_file_logger
 
@@ -60,7 +61,10 @@ def run_youtube_dl(list_id: str, config: dict, videos_path: str):
             try:
                 if not os.path.exists(videos_path):
                     os.mkdir(videos_path)
-                ytdl.extract_info(list_id, download=True)
+                    ytdl.extract_info(list_id, download=True)
+            except MaxDownloadsReached:
+                vid_num = len(os.listdir(videos_path))
+                flogging.info(f'number of downloading videos {vid_num}')
             except Exception as e:
                 traceback.print_exc()
                 flogging.warning('failed to extract list')

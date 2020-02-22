@@ -1,5 +1,6 @@
 import logging
 import sys
+import traceback
 from signal import pause
 
 from gpiozero import DistanceSensor, Button
@@ -7,13 +8,14 @@ from gpiozero import DistanceSensor, Button
 from tj_frame import screen
 from tj_frame.streaming import get_active_player, play_outage, stop_outage
 from tj_frame.streaming import validate_channel_config, stream
-from tj_frame.utils import read_config, kill_app, toggle, reboot_device
+from tj_frame.utils import read_config, kill_app, toggle
 
 CHANNELS = ['pl', 'live']
 logging.basicConfig(format='%(asctime)s - %(message)s', level=logging.INFO)
 
 
 def toggle_channel():
+    stop_outage()
     current_player = get_active_player(CHANNELS[toggle_channel.current_channel_id])
     if current_player:
         current_player.pause()
@@ -29,9 +31,9 @@ def stream_channel(channel_id: int):
     channel = CHANNELS[channel_id]
     if config and channel and validate_channel_config(config[channel], channel):
         try:
-            stop_outage()
             stream(channel, config[channel])
         except Exception as e:
+            traceback.print_exc()
             play_outage(channel, f'streaming failed')
         finally:
             return
@@ -43,7 +45,7 @@ def wakeup():
     try:
         player.play()
     except Exception as e:
-        logging.error("player is disfunctional, reason: ", e)
+        logging.warning("no player found!")
         stream_channel(toggle_channel.current_channel_id)
     finally:
         screen.turn_on()
@@ -71,14 +73,11 @@ def switch_button_action(btn):
         logging.info(f'button pressed!')
     else:
         logging.info(f'button held!')
-        if btn.held_time > 10:
-            reboot_device()
-        else:
-            if btn.sensor:
-                if btn.sensor.closed:
-                    btn.sensor = start_sensor()
-                else:
-                    btn.sensor.close()
+        if btn.sensor:
+            if btn.sensor.closed:
+                btn.sensor = start_sensor()
+            else:
+                btn.sensor.close()
     btn.was_held = False
 
 
@@ -87,7 +86,7 @@ Button.was_held = False
 
 def start_sensor():
     logging.info('Sensor Enabled ....')
-    d_sensor = DistanceSensor(echo=24, trigger=23, max_distance=1, threshold_distance=0.5, partial=True)
+    d_sensor = DistanceSensor(echo=24, trigger=23, max_distance=1.2, threshold_distance=0.8, queue_len=4)
     d_sensor.when_in_range = wakeup
     d_sensor.when_out_of_range = standby
     return d_sensor

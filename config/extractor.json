@@ -4,11 +4,11 @@
     "ignoreerrors": true,
     "playlistrandom": true,
     "outtmpl": "./vids/%(id)s.%(ext)s",
-    "max_downloads": 20
+    "max_downloads": 10
   },
   "streamlink": {},
   "cron": {
-    "day_of_week": "mon",
+    "day_of_week": "*",
     "hour": 2,
     "minute": 30
   }
