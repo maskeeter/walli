@@ -21,6 +21,8 @@ sudo systemctl daemon-reload
 sudo systemctl enable walli.service
 ```
 
+**Note:** Add an _outage.mp4_ file to working directory to play as an outage footage when one of the channels is not available (currently not configurable).
+
 ## Configuration
 - **global configuration:**
   
