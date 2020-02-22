@@ -23,16 +23,26 @@ sudo systemctl enable walli.service
 
 ## Configuration
 - **global configuration:**
+  
   contains for each channel:
   - target playlist / livestream 
   - player configuration file used
   - _for playlist:_ filename used to merge downloaded files.
+  
 - **extractotr configuration**
+    
     contains configuration for python wrappers of both [streamlink](https://streamlink.github.io/api.html#streamlink.Streamlink.set_option) and [youtube_dl](https://github.com/ytdl-org/youtube-dl/blob/3e4cedf9e8cd3157df2457df7274d0c842421945/youtube_dl/YoutubeDL.py#L137-L312), and the cron used by scheduler to schedule playlist downloads.
+    
 - **player configuration:**
+    
     contains omxplayer configuratiton (read more about it [here](https://github.com/popcornmix/omxplayer#synopsis))
 
 ## Usage
+
+- sensor will wake up the player when anybody is standing closer than threshold (currently hardcoded to 0.8m)
+- button press will either be:
+  **short** will toggle the channel
+  **long** will enable/disable the sensor
 
 ## Circuit
 ![Alt text](circuit.png?raw=true "Title")
