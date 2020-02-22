@@ -1,6 +1,13 @@
 # Walli
 
 a raspberry pi mini tv with youtube/gif channels that will work only when you're standing in front of it.
+
+Use pipenv to build the application:
+
+```
+pipenv install /project/path
+```
+
 Use walli.service with debian systemctl to autorun the script everytime the device restarts:
 ``` 
 sudo systemctl daemon-reload
