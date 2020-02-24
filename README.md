@@ -47,7 +47,8 @@ sudo systemctl enable walli.service
   **short** will toggle the channel
   **long** will enable/disable the sensor (and keep player at current state.)
 
-## Circuit
+## Circuit Diagram
+
 ![Alt text](circuit.png?raw=true "Title")
 
 Licensed under GNU General Public License v3.0
