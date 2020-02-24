@@ -39,7 +39,8 @@ sudo systemctl enable walli.service
 
 ## Usage
 
-- sensor will wake up the player when anybody is standing closer than threshold (currently hardcoded to 0.8m)
+- sensor will wake up the player when anybody is standing closer than threshold (configurable through [global configuration](/config/global_config.json))
+- response time is decided by the delay field in global configuration as well (slow response might be preferable sometimes to avoid frame waking up and sleeping too often)
 - button press will either be:
   **short** will toggle the channel
   **long** will enable/disable the sensor (and keep player at current state.)

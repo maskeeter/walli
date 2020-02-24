@@ -1,13 +1,20 @@
 {
-  "pl": {
-    "list_id": "PLsX9PShhztBhLNdq7Op4I7VbKdB81Afvu",
-    "player_config": "config/player.config",
-    "extractor_config": "config/extractor.json",
-    "playlist_target": "playlist"
+  "channels": {
+    "pl": {
+      "list_id": "PLsX9PShhztBhLNdq7Op4I7VbKdB81Afvu",
+      "player_config": "config/player.config",
+      "extractor_config": "config/extractor.json",
+      "playlist_target": "playlist"
+    },
+    "live": {
+      "url": "https://www.youtube.com/watch?v=933-mhry0Bc",
+      "extractor_config": "config/extractor.json",
+      "player_config": "config/player.config"
+    }
   },
-  "live": {
-    "url": "https://www.youtube.com/watch?v=933-mhry0Bc",
-    "extractor_config": "config/extractor.json",
-    "player_config": "config/player.config"
+  "sensor": {
+    "max_distance": 1.4,
+    "threshold": 1.25,
+    "delay": 1
   }
 }

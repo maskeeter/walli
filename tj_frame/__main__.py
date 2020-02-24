@@ -14,10 +14,15 @@ CHANNELS = ['pl', 'live']
 logging.basicConfig(format='%(asctime)s - %(message)s', level=logging.INFO)
 
 
+def read_global_config(key: str):
+    global_config = read_config("config/global_config.json")
+    return global_config[key] if global_config and key in global_config else None
+
+
 def toggle_channel():
     stop_outage()
     current_player = get_active_player(CHANNELS[toggle_channel.current_channel_id])
-    if current_player:
+    if current_player and current_player.is_playing():
         current_player.pause()
     toggle_channel.current_channel_id = toggle(CHANNELS, toggle_channel.current_channel_id)
     wakeup()
@@ -27,7 +32,7 @@ toggle_channel.current_channel_id = 0
 
 
 def stream_channel(channel_id: int):
-    config = read_config("config/global_config.json")
+    config = read_global_config('channels')
     channel = CHANNELS[channel_id]
     if config and channel and validate_channel_config(config[channel], channel):
         try:
@@ -85,11 +90,19 @@ Button.was_held = False
 
 
 def start_sensor():
-    logging.info('Sensor Enabled ....')
-    d_sensor = DistanceSensor(echo=24, trigger=23, max_distance=1.2, threshold_distance=0.8, queue_len=4)
-    d_sensor.when_in_range = wakeup
-    d_sensor.when_out_of_range = standby
-    return d_sensor
+    config = read_global_config('sensor')
+    try:
+        if config:
+            d_sensor = DistanceSensor(echo=24, trigger=23, max_distance=config.get('max_distance'),
+                                      threshold_distance=config.get('threshold'), queue_len=(config.get('delay') * 40))
+            d_sensor.when_in_range = wakeup
+            d_sensor.when_out_of_range = standby
+            logging.info('Sensor Enabled ....')
+            return d_sensor
+        kill_app("No configuration exists!")
+    except Exception as e:
+        logging.error("loading sensor failed, check configuration!")
+        raise e
 
 
 def stop_sensor(d_sensor: DistanceSensor):
